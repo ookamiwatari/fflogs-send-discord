@@ -1,6 +1,8 @@
 // .envをロード
 require('dotenv').config();
 
+var express = require('express');
+var app = express();
 var Discord = require('discord.io');
 var request = require('sync-request');
 
@@ -18,6 +20,13 @@ var discordReady = false;
 
 // レポートリストを取得するループ
 setInterval(getReportList, 5000);
+
+app.get('/', function (req, res) {
+  res.send('Hello, World!');
+});
+
+app.listen(process.env.PORT || 3000);
+
 
 bot.on('ready', function() {
 	console.log('Logged in as %s - %s\n', bot.username, bot.id);
