@@ -11,8 +11,13 @@ var bot = new Discord.Client({
 	autorun: true
 });
 
-var targetUserList = ['ookamiwatari', 'whitebaku'];
+// 環境変数からユーザリストをロード
+var targetUserList = [];
+if( process.env.DEFAULT_TARGET_USER_LIST ) targetUserList = (process.env.DEFAULT_TARGET_USER_LIST).split(",");
+
+// 環境変数からレポートリストをロード
 var targetReportList = [];
+if( process.env.DEFAULT_TARGET_REPORT_LIST ) targetReportList = (process.env.DEFAULT_TARGET_REPORT_LIST).split(",");
 
 // discordに接続したか
 var discordReady = false;
