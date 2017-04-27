@@ -1,4 +1,4 @@
-// .env‚ğƒ[ƒh
+// .envã‚’ãƒ­ãƒ¼ãƒ‰
 require('dotenv').config();
 
 var express = require('express');
@@ -11,19 +11,19 @@ var bot = new Discord.Client({
 	autorun: true
 });
 
-// ŠÂ‹«•Ï”‚©‚çƒ†[ƒUƒŠƒXƒg‚ğƒ[ƒh
+// ç’°å¢ƒå¤‰æ•°ã‹ã‚‰ãƒ¦ãƒ¼ã‚¶ãƒªã‚¹ãƒˆã‚’ãƒ­ãƒ¼ãƒ‰
 var targetUserList = [];
 if( process.env.DEFAULT_TARGET_USER_LIST ) targetUserList = (process.env.DEFAULT_TARGET_USER_LIST).split(",");
 
-// ŠÂ‹«•Ï”‚©‚çƒŒƒ|[ƒgƒŠƒXƒg‚ğƒ[ƒh
+// ç’°å¢ƒå¤‰æ•°ã‹ã‚‰ãƒ¬ãƒãƒ¼ãƒˆãƒªã‚¹ãƒˆã‚’ãƒ­ãƒ¼ãƒ‰
 var targetReportList = [];
 if( process.env.DEFAULT_TARGET_REPORT_LIST ) targetReportList = (process.env.DEFAULT_TARGET_REPORT_LIST).split(",");
 
-// discord‚ÉÚ‘±‚µ‚½‚©
+// discordã«æ¥ç¶šã—ãŸã‹
 var discordReady = false;
 
 
-// ƒŒƒ|[ƒgƒŠƒXƒg‚ğæ“¾‚·‚éƒ‹[ƒv
+// ãƒ¬ãƒãƒ¼ãƒˆãƒªã‚¹ãƒˆã‚’å–å¾—ã™ã‚‹ãƒ«ãƒ¼ãƒ—
 setInterval(getReportList, 5000);
 
 app.get('/', function (req, res) {
@@ -50,16 +50,16 @@ bot.on('message', function(user, userID, channelID, message, event) {
 		return;
 	}
 	
-	// user list‚Ì–½—ß‚ğ’Ç‰Á
-	// ToDo: ‚í‚©‚è‚â‚·‚­•`‰æ‚³‚¹‚é
+	// user listã®å‘½ä»¤ã‚’è¿½åŠ 
+	// ToDo: ã‚ã‹ã‚Šã‚„ã™ãæç”»ã•ã›ã‚‹
 	if (messageArray[1] === 'user' && messageArray[2] === 'list' && messageArray.length == 3 ) {
 		sendDiscord(targetUserList.join('\n'));
 	}
 	
-	// user add *‚Ì–½—ß‚ğ’Ç‰Á
+	// user add *ã®å‘½ä»¤ã‚’è¿½åŠ 
 	if (messageArray[1] === 'user' && messageArray[2] === 'add' && messageArray.length == 4 ) {
 	
-		// ‚»‚Ì–¼‘O‚ª‘¶İ‚·‚é‚©Šm”F
+		// ãã®åå‰ãŒå­˜åœ¨ã™ã‚‹ã‹ç¢ºèª
 		var url = 'https://www.fflogs.com/v1/reports/user/' + messageArray[3] + '?api_key=' + process.env.FFLOGS_PUBLIC_KEY;
 		var response = request('GET', url);
 		if (response.statusCode == 400) {
@@ -68,23 +68,23 @@ bot.on('message', function(user, userID, channelID, message, event) {
 			return;
 		}
 		
-		// Šù‚É’Ç‰Á‚³‚ê‚Ä‚¢‚éê‡
+		// æ—¢ã«è¿½åŠ ã•ã‚Œã¦ã„ã‚‹å ´åˆ
 		if (targetUserList.indexOf(messageArray[3]) >=0 ) {
 			var message = 'User \'' + messageArray[3] + '\' already exists.'
 			sendDiscord(message);
 			return;
 		}
 		
-		// ƒŠƒXƒg‚É’Ç‰Á
+		// ãƒªã‚¹ãƒˆã«è¿½åŠ 
 		var message = 'User \'' + messageArray[3] + '\' was added successfully.'
 		sendDiscord(message);
 		targetUserList.push(messageArray[3]);
 	}
 	
-	// user delete *‚Ì–½—ß‚ğ’Ç‰Á
+	// user delete *ã®å‘½ä»¤ã‚’è¿½åŠ 
 	if (messageArray[1] === 'user' && messageArray[2] === 'delete' && messageArray.length == 4 ) {
 	
-		// ‚»‚Ì–¼‘O‚ª‘¶İ‚·‚é‚©Šm”F
+		// ãã®åå‰ãŒå­˜åœ¨ã™ã‚‹ã‹ç¢ºèª
 		var index = targetUserList.indexOf(messageArray[3]);
 		if (index >=0 ) {
 			targetUserList.splice(index,1);
@@ -93,14 +93,14 @@ bot.on('message', function(user, userID, channelID, message, event) {
 			return;
 			
 		} else {
-			// ‘¶İ‚µ‚È‚¢ê‡
+			// å­˜åœ¨ã—ãªã„å ´åˆ
 			var message = 'User \'' + messageArray[3] + '\' is undefined.'
 			sendDiscord(message);
 			return;
 		}
 	}
 	
-	// user delete ‚Ì–½—ß‚ğ’Ç‰Á
+	// user delete ã®å‘½ä»¤ã‚’è¿½åŠ 
 	if (messageArray[1] === 'user' && messageArray[2] === 'delete' && messageArray.length == 3 ) {
 		targetUserList = [];
 		var message = 'UserList delete successfully.'
@@ -108,16 +108,16 @@ bot.on('message', function(user, userID, channelID, message, event) {
 		return;
 	}
 
-	// user list‚Ì–½—ß‚ğ’Ç‰Á
-	// ToDo: ‚í‚©‚è‚â‚·‚­•`‰æ‚³‚¹‚é
+	// user listã®å‘½ä»¤ã‚’è¿½åŠ 
+	// ToDo: ã‚ã‹ã‚Šã‚„ã™ãæç”»ã•ã›ã‚‹
 	if (messageArray[1] === 'report' && messageArray[2] === 'list' && messageArray.length == 3 ) {
 		sendDiscord(targetReportList.join('\n'));
 	}
 	
-	// user add *‚Ì–½—ß‚ğ’Ç‰Á
+	// user add *ã®å‘½ä»¤ã‚’è¿½åŠ 
 	if (messageArray[1] === 'report' && messageArray[2] === 'add' && messageArray.length == 4 ) {
 	
-		// ‚»‚Ì–¼‘O‚ª‘¶İ‚·‚é‚©Šm”F
+		// ãã®åå‰ãŒå­˜åœ¨ã™ã‚‹ã‹ç¢ºèª
 		var url = 'https://www.fflogs.com/v1/report/fights/' + messageArray[3] + '?api_key=' + process.env.FFLOGS_PUBLIC_KEY;
 		var response = request('GET', url);
 		if (response.statusCode == 400) {
@@ -126,23 +126,23 @@ bot.on('message', function(user, userID, channelID, message, event) {
 			return;
 		}
 		
-		// Šù‚É’Ç‰Á‚³‚ê‚Ä‚¢‚éê‡
+		// æ—¢ã«è¿½åŠ ã•ã‚Œã¦ã„ã‚‹å ´åˆ
 		if (targetReportList.indexOf(messageArray[3]) >=0 ) {
 			var message = 'Report \'' + messageArray[3] + '\' already exists.'
 			sendDiscord(message);
 			return;
 		}
 		
-		// ƒŠƒXƒg‚É’Ç‰Á
+		// ãƒªã‚¹ãƒˆã«è¿½åŠ 
 		var message = 'Report \'' + messageArray[3] + '\' was added successfully.'
 		sendDiscord(message);
 		targetReportList.push(messageArray[3]);
 	}
 	
-	// user delete *‚Ì–½—ß‚ğ’Ç‰Á
+	// user delete *ã®å‘½ä»¤ã‚’è¿½åŠ 
 	if (messageArray[1] === 'report' && messageArray[2] === 'delete' && messageArray.length == 4 ) {
 	
-		// ‚»‚Ì–¼‘O‚ª‘¶İ‚·‚é‚©Šm”F
+		// ãã®åå‰ãŒå­˜åœ¨ã™ã‚‹ã‹ç¢ºèª
 		var index = targetReportList.indexOf(messageArray[3]);
 		if (index >=0 ) {
 			targetReportList.splice(index,1);
@@ -151,14 +151,14 @@ bot.on('message', function(user, userID, channelID, message, event) {
 			return;
 			
 		} else {
-			// ‘¶İ‚µ‚È‚¢ê‡
+			// å­˜åœ¨ã—ãªã„å ´åˆ
 			var message = 'Report \'' + messageArray[3] + '\' is undefined.'
 			sendDiscord(message);
 			return;
 		}
 	}
 	
-	// user delete ‚Ì–½—ß‚ğ’Ç‰Á
+	// user delete ã®å‘½ä»¤ã‚’è¿½åŠ 
 	if (messageArray[1] === 'report' && messageArray[2] === 'delete' && messageArray.length == 3 ) {
 		targetReportList = [];
 		var message = 'ReportList delete successfully.'
