@@ -21,10 +21,17 @@ if( process.env.DEFAULT_TARGET_REPORT_LIST ) targetReportList = (process.env.DEF
 
 // discordに接続したか
 var discordReady = false;
+var startWait = false;
 
+// 最新の戦闘終了時間
+var lastFightTime = 0;
+
+// 起動後一定時間はdiscordにメッセージを送信しない待機
+setTimeout(function(){ startWait = true;console.log("start");}, 60000);
 
 // レポートリストを取得するループ
-setInterval(getReportList, 5000);
+setInterval(getReportList, 10000);
+setInterval(getFight,10000);
 
 app.get('/', function (req, res) {
   res.send('Hello, World!');
@@ -32,20 +39,22 @@ app.get('/', function (req, res) {
 
 app.listen(process.env.PORT || 3000);
 
-
+// discordに接続したら
 bot.on('ready', function() {
 	console.log('Logged in as %s - %s\n', bot.username, bot.id);
 	discordReady = true;
 });
- 
+
+// discordからの操作用API
 bot.on('message', function(user, userID, channelID, message, event) {
 	
+	// 対象のチャンネルじゃなければ終了する
 	if (channelID !== process.env.DISCORD_TARGET_CHANNEL) {
 		return;
 	}
 	
+	// 指定されたメッセージではなければ終了する
 	var messageArray = message.split(' ');
-	
 	if (messageArray.length < 2 || messageArray[0] !== 'logs') {
 		return;
 	}
@@ -173,10 +182,12 @@ function getReportList() {
 
 	targetUserList.forEach(function(userName) {
 	
+		// レポートを取得
 		var url = 'https://www.fflogs.com/v1/reports/user/' + userName + '?api_key=' + process.env.FFLOGS_PUBLIC_KEY;
 		var response = request('GET', url);
 		var body = JSON.parse(response.body.toString());
 		
+		// 最新のレポートを取得
 		var lastReport = body[0];
 		body.forEach(function(report) {
 			if(lastReport.end < report.end) {
@@ -184,8 +195,7 @@ function getReportList() {
 			}
 		});
 		
-		
-		
+		// リストに存在するか確認して追加する
 		var index = targetReportList.indexOf(lastReport.id);
 		if (index == -1) {
 			targetReportList.push(lastReport.id);
@@ -197,11 +207,70 @@ function getReportList() {
 
 }
 
+function getFight() {
+
+	targetReportList.forEach(function(report) {
+	
+		var url = 'https://www.fflogs.com/v1/report/fights/' + report + '?api_key=' + process.env.FFLOGS_PUBLIC_KEY;
+		var response = request('GET', url);
+		var body = JSON.parse(response.body.toString());
+		
+	
+		var lastFight = body.fights[0];
+		body.fights.forEach(function(fight) {
+			if(lastFight.end_time < fight.end_time) {
+				lastFight = fight;
+			}
+		});
+		
+		if(lastFight == undefined) return;
+	
+		// 新しいのが無い場合
+		if(lastFightTime >= body.end + lastFight.end_time) return;
+		lastFightTime = body.end + lastFight.end_time;
+		
+		// 戦闘を取得して送信する処理		
+		var url = 'https://www.fflogs.com/v1/report/tables/damage-done/' + report + '?start=' + lastFight.start_time + '&end=' + lastFight.end_time + '&api_key=' + process.env.FFLOGS_PUBLIC_KEY;
+		var response = request('GET', url);
+		var body = JSON.parse(response.body.toString());
+	
+	
+		var message = "";
+		
+		// 敵の名前を追加
+		message += "【" + lastFight.name + "】";
+		message += lastFight.zoneName;
+		message += "\n";
+		if ( lastFight.kill == true ) {
+			message += "kill ";
+			message += body.totalTime + "msec";
+		} else if ( lastFight.kill == false ) {
+			message += "wipe ";
+			message += lastFight.bossPercentage / 100 + "%";
+		}
+		
+		body.entries.sort(function(a,b){
+			if(a.total > b.total) return -1;
+			if(a.total < b.total) return 1;
+			return 0;
+		});
+		
+		body.entries.forEach(function(entrie) {
+			message += entrie.name + ' (' + entrie.type + ') ' + Math.floor(entrie.total / body.totalTime * 10000)/10 + '\n';
+		});
+		
+		sendDiscord(message);
+	
+	});
+
+}
+
 function sendDiscord( message, channel){
 
-	if(!discordReady) return;
+	if(!discordReady || !startWait) return;
 	
 	if(channel == undefined) channel = process.env.DISCORD_TARGET_CHANNEL
+
 	bot.sendMessage({
 		to: channel,
 		message: message
