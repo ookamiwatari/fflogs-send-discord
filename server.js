@@ -25,17 +25,27 @@ if( process.env.DEFAULT_TARGET_REPORT_LIST ) targetReportList = (process.env.DEF
 
 // discordに接続したか
 var discordReady = false;
+
+// 起動後一定時間はdiscordにメッセージを送信しない待機
 var startWait = false;
 
 // 最新の戦闘終了時間
 var lastFightTime = 0;
 
-// 起動後一定時間はdiscordにメッセージを送信しない待機
-setTimeout(function(){ startWait = true;console.log("start");}, 60000);
+// 起動処理を順番に行っていく
+setTimeout(startReady, process.env.START_WAIT);
+setTimeout(getFight, process.env.START_WAIT/2);
+setTimeout(getReportList, process.env.START_WAIT/4);
 
-// レポートリストを取得するループ
-setInterval(getReportList, 10000);
-setInterval(getFight,10000);
+
+function startReady() {
+	// レポートリストを取得するループ
+	setInterval(getReportList, process.env.API_INTERVAL);
+	setInterval(getFight,process.env.API_INTERVAL);
+
+	startWait = true;
+	console.log("start");
+}
 
 app.get('/', function (req, res) {
   res.send('Hello, World!');
