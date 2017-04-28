@@ -257,6 +257,8 @@ function getReportList() {
 		// レポートを取得
 		var url = 'https://www.fflogs.com/v1/reports/user/' + userName + '?api_key=' + process.env.FFLOGS_PUBLIC_KEY;
 		var response = request('GET', url);
+		if (response.statusCode !== 200 ) return;
+
 		var body = JSON.parse(response.body.toString());
 
 		// 最新のレポートを取得
@@ -282,6 +284,8 @@ function getReportList() {
 		// レポートを取得
 		var url = 'https://www.fflogs.com/v1/reports/guild/' + guildName + '?api_key=' + process.env.FFLOGS_PUBLIC_KEY;
 		var response = request('GET', url);
+		if (response.statusCode !== 200 ) return;
+
 		var body = JSON.parse(response.body.toString());
 
 		// 最新のレポートを取得
@@ -309,6 +313,8 @@ function getFight() {
 
 		var url = 'https://www.fflogs.com/v1/report/fights/' + report + '?api_key=' + process.env.FFLOGS_PUBLIC_KEY;
 		var response = request('GET', url);
+		if (response.statusCode !== 200 ) return;
+
 		var body = JSON.parse(response.body.toString());
 
 
@@ -328,6 +334,7 @@ function getFight() {
 		// 戦闘を取得して送信する処理		
 		var url = 'https://www.fflogs.com/v1/report/tables/damage-done/' + report + '?start=' + lastFight.start_time + '&end=' + lastFight.end_time + '&api_key=' + process.env.FFLOGS_PUBLIC_KEY;
 		var response = request('GET', url);
+		if (response.statusCode !== 200 ) return;
 		var body = JSON.parse(response.body.toString());
 
 		var message = "";
