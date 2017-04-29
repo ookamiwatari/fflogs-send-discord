@@ -327,6 +327,7 @@ function getFight() {
 
 		if(lastFight == undefined) return;
 
+
 		// 新しいのが無い場合
 		if(lastFightTime >= body.end + lastFight.end_time) return;
 		lastFightTime = body.end + lastFight.end_time;
@@ -345,10 +346,10 @@ function getFight() {
 		message += "\n";
 		if ( lastFight.kill == true ) {
 			message += "kill ";
-			message += body.totalTime + "msec";
+			message += body.totalTime + "msec\n";
 		} else if ( lastFight.kill == false ) {
 			message += "wipe ";
-			message += lastFight.bossPercentage / 100 + "%";
+			message += lastFight.bossPercentage / 100 + "%\n";
 		}
 
 		body.entries.sort(function(a,b){
