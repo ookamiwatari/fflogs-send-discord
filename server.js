@@ -11,6 +11,14 @@ var bot = new Discord.Client({
 	autorun: true
 });
 
+
+// phantomjs用
+var path = require('path')
+var childProcess = require('child_process')
+var phantomjs = require('phantomjs-prebuilt')
+var binPath = phantomjs.path
+
+
 // 環境変数からユーザリストをロード
 var targetUserList = [];
 if( process.env.DEFAULT_TARGET_USER_LIST ) targetUserList = (process.env.DEFAULT_TARGET_USER_LIST).split(",");
@@ -317,52 +325,50 @@ function getFight() {
 
 		var body = JSON.parse(response.body.toString());
 
+		if( body.fights == undefined) return;
 
-		var lastFight = body.fights[0];
-		body.fights.forEach(function(fight) {
-			if(lastFight.end_time < fight.end_time) {
-				lastFight = fight;
-			}
-		});
-
-		if(lastFight == undefined) return;
-
+		var lastFight = body.fights[body.fights.length-1];
 
 		// 新しいのが無い場合
 		if(lastFightTime >= body.start + lastFight.end_time) return;
 		lastFightTime = body.start + lastFight.end_time;
 
-		// 戦闘を取得して送信する処理		
-		var url = 'https://www.fflogs.com/v1/report/tables/damage-done/' + report + '?start=' + lastFight.start_time + '&end=' + lastFight.end_time + '&api_key=' + process.env.FFLOGS_PUBLIC_KEY;
-		var response = request('GET', url);
-		if (response.statusCode !== 200 ) return;
-		var body = JSON.parse(response.body.toString());
+		// 戦闘を取得して送信する処理
+		var childArgs = [
+			path.join(__dirname, 'phantomjs-script.js'),
+			'https://www.fflogs.com/reports/',
+			report,
+			lastFight.id
+		]
 
 		var message = "";
 
 		// 敵の名前を追加
 		message += "【" + lastFight.name + "】";
 		message += lastFight.zoneName;
-		message += "\n";
+		message += " ";
+
+		// 所要時間を追加
+		var time = lastFight.end_time - lastFight.start_time;
+		var timeMsg = "" + Math.floor(time / 1000 / 60) + ":" + ('00'+(Math.floor(time/1000) % 60)).slice(-2);
 		if ( lastFight.kill == true ) {
 			message += "kill ";
-			message += body.totalTime + "msec\n";
+			message += timeMsg + "\n";
 		} else if ( lastFight.kill == false ) {
-			message += "wipe ";
-			message += lastFight.bossPercentage / 100 + "%\n";
+			message += lastFight.bossPercentage / 100;
+			message += timeMsg + "\n"
+		} else {
+			message += timeMsg + "\n";
 		}
 
-		body.entries.sort(function(a,b){
-			if(a.total > b.total) return -1;
-			if(a.total < b.total) return 1;
-			return 0;
+		childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
+			message += '```\n'
+			// 余分なメッセージを除去
+			message += stdout.match(/.*Start_Response\s+([\s\S]*)\s+End_Response.*/)[1].slice(0,-2);
+			message +='\n```'
+			console.log(message);
+			sendDiscord(message);
 		});
-
-		body.entries.forEach(function(entrie) {
-			message += entrie.name + ' (' + entrie.type + ') ' + Math.floor(entrie.total / body.totalTime * 10000)/10 + '\n';
-		});
-
-		sendDiscord(message);
 
 	});
 
