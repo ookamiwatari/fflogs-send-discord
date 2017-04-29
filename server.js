@@ -329,8 +329,8 @@ function getFight() {
 
 
 		// 新しいのが無い場合
-		if(lastFightTime >= body.end + lastFight.end_time) return;
-		lastFightTime = body.end + lastFight.end_time;
+		if(lastFightTime >= body.start + lastFight.end_time) return;
+		lastFightTime = body.start + lastFight.end_time;
 
 		// 戦闘を取得して送信する処理		
 		var url = 'https://www.fflogs.com/v1/report/tables/damage-done/' + report + '?start=' + lastFight.start_time + '&end=' + lastFight.end_time + '&api_key=' + process.env.FFLOGS_PUBLIC_KEY;
