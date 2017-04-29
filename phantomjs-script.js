@@ -25,12 +25,12 @@ var eva = function() {
 	// 各々の値を取得
 	for (var i = 0, size = $(".table-icon").length; i < size; i++) {
 		if($(".main-table-performance")[i]) {
-			msg += $(".main-table-performance")[i].innerText;
+			msg += $(".main-table-performance")[i].innerText.replace(/\t|(\r?\n)/g,"");
 			msg += "% ";
 		}
 		
 		if($(".main-table-name")[i]) {
-			msg += $(".main-table-name")[i].innerText.replace(/\t|\r?\n/g,"");
+			msg += $(".main-table-name")[i].innerText.replace(/\t|(\r?\n)/g,"");
 		}
 		if($(".table-icon")[i]) {
 			msg += " (";
@@ -39,7 +39,7 @@ var eva = function() {
 		}
 
 		if($(".main-table-number")[i]) {
-			msg += $(".main-table-number")[i].innerText;
+			msg += $(".main-table-number")[i].innerText.replace(/\t|(\r?\n)/g,"");
 		}
 		
 		msg += "\n";
@@ -48,14 +48,14 @@ var eva = function() {
 	// totalの値を取得
 	{
 		if($(".main-table-performance")[$(".main-table-performance").length-1]) {
-			msg += $(".main-table-performance")[$(".main-table-performance").length-1].innerText;
+			msg += $(".main-table-performance")[$(".main-table-performance").length-1].innerText.replace(/\t|(\r?\n)/g,"");
 			msg += "% "
 		}
 
 		msg += "Total ";
 
 		if($(".main-table-number")[$(".main-table-number").length-1]) {
-			msg += $(".main-table-number")[$(".main-table-number").length-1].innerText;
+			msg += $(".main-table-number")[$(".main-table-number").length-1].innerText.replace(/\t|(\r?\n)/g,"");
 		}
 
 		msg += "\n";
