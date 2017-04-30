@@ -55,7 +55,7 @@ var eva = function() {
 		msg += "Total ";
 
 		if($(".main-table-number")[$(".main-table-number").length-1]) {
-			msg += $(".main-table-number")[$(".main-table-number").length-1].innerText.replace(/\t|(\r?\n)/g,"");
+			msg += $(".main-table-number")[$(".main-table-number").length-1].innerText;
 		}
 
 		msg += "\n";
