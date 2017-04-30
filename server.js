@@ -317,6 +317,8 @@ function getReportList() {
 
 function getFight() {
 
+	var lastFight = null;
+	var childArgs = [];
 	targetReportList.forEach(function(report) {
 
 		var url = 'https://www.fflogs.com/v1/report/fights/' + report + '?api_key=' + process.env.FFLOGS_PUBLIC_KEY;
@@ -327,49 +329,51 @@ function getFight() {
 
 		if( body.fights == undefined) return;
 
-		var lastFight = body.fights[body.fights.length-1];
+		// 新しいのが有る場合
+		if(lastFightTime < body.start + body.fights[body.fights.length-1].end_time - process.env.API_INTERVAL ) {
+			lastFight = body.fights[body.fights.length-1];
+			lastFightTime = body.start + lastFight.end_time;
 
-		// 新しいのが無い場合
-		if(lastFightTime > body.start + lastFight.end_time + process.env.API_INTERVAL ) return;
-		lastFightTime = body.start + lastFight.end_time;
+			// 戦闘を取得する命令を宣言
+			childArgs = [
+				path.join(__dirname, 'phantomjs-script.js'),
+				'https://www.fflogs.com/reports/',
+				report,
+				lastFight.id
+			];
 
-		// 戦闘を取得して送信する処理
-		var childArgs = [
-			path.join(__dirname, 'phantomjs-script.js'),
-			'https://www.fflogs.com/reports/',
-			report,
-			lastFight.id
-		]
-
-		var message = "";
-
-		// 敵の名前を追加
-		message += "【" + lastFight.name + "】";
-		message += lastFight.zoneName;
-		message += " ";
-
-		// 所要時間を追加
-		var time = lastFight.end_time - lastFight.start_time;
-		var timeMsg = "" + Math.floor(time / 1000 / 60) + ":" + ('00'+(Math.floor(time/1000) % 60)).slice(-2);
-		if ( lastFight.kill == true ) {
-			message += "kill ";
-			message += timeMsg + "\n";
-		} else if ( lastFight.kill == false ) {
-			message += lastFight.bossPercentage / 100;
-			message += timeMsg + "\n"
-		} else {
-			message += timeMsg + "\n";
 		}
+	});
 
-		childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
-			message += '```\n'
-			// 余分なメッセージを除去
-			message += stdout.match(/.*Start_Response\s+([\s\S]*)\s+End_Response.*/)[1].slice(0,-2);
-			message +='\n```'
-			console.log(message);
-			sendDiscord(message);
-		});
+	// 新しいのが無い場合
+	if(!lastFight) return;
 
+	var message = "";
+
+	// 敵の名前を追加
+	message += "【" + lastFight.name + "】";
+	message += lastFight.zoneName;
+	message += " ";
+
+	// 所要時間を追加
+	var time = lastFight.end_time - lastFight.start_time;
+	var timeMsg = "" + Math.floor(time / 1000 / 60) + ":" + ('00'+(Math.floor(time/1000) % 60)).slice(-2);
+	if ( lastFight.kill == true ) {
+		message += "kill ";
+		message += timeMsg + "\n";
+	} else if ( lastFight.kill == false ) {
+		message += lastFight.bossPercentage / 100;
+		message += timeMsg + "\n"
+	} else {
+		message += timeMsg + "\n";
+	}
+
+	childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
+		message += '```\n'
+		message += stdout.match(/.*Start_Response\s+([\s\S]*)\s+End_Response.*/)[1].slice(0,-2);
+		message +='\n```'
+		console.log(message);
+		sendDiscord(message);
 	});
 
 }
