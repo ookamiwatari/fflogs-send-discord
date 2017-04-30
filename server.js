@@ -330,7 +330,7 @@ function getFight() {
 		var lastFight = body.fights[body.fights.length-1];
 
 		// 新しいのが無い場合
-		if(lastFightTime >= body.start + lastFight.end_time) return;
+		if(lastFightTime > body.start + lastFight.end_time + process.env.API_INTERVAL ) return;
 		lastFightTime = body.start + lastFight.end_time;
 
 		// 戦闘を取得して送信する処理
