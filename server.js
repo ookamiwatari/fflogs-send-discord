@@ -328,6 +328,7 @@ function getFight() {
 		var body = JSON.parse(response.body.toString());
 
 		if( body.fights == undefined) return;
+		if( body.fights[body.fights.length-1].kill === undefined ) return;
 
 		// 新しいのが有る場合
 		if(lastFightTime < body.start + body.fights[body.fights.length-1].end_time - process.env.API_INTERVAL ) {
