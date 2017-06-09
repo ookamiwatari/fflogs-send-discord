@@ -6,12 +6,12 @@ var page = require('webpage').create();
 page.open(args[1] + args[2] + '#fight=' + args[3] + '&type=damage-done', function(status) {
 	
 		page.includeJs('http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js', function() {
-
-			console.log("Start_Response")
-			console.log(page.evaluate(eva));
-			console.log("End_Response");
-			phantom.exit();
-			
+			setTimeout(function () {
+				console.log("Start_Response")
+				console.log(page.evaluate(eva));
+				console.log("End_Response");
+				phantom.exit();
+			}, 5000);
 		});
 
 
