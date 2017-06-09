@@ -45,7 +45,6 @@ setTimeout(startReady, process.env.START_WAIT);
 setTimeout(getFight, process.env.START_WAIT/2);
 setTimeout(getReportList, process.env.START_WAIT/4);
 
-
 function startReady() {
 	// レポートリストを取得するループ
 	setInterval(getReportList, process.env.API_INTERVAL);
@@ -327,7 +326,8 @@ function getFight() {
 
 		var body = JSON.parse(response.body.toString());
 
-		if( body.fights == undefined) return;
+		if( body.fights === undefined ) return;
+		if( body.fights[body.fights.length-1] === undefined ) return;
 		if( body.fights[body.fights.length-1].kill === undefined ) return;
 
 		// 新しいのが有る場合
