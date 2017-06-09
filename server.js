@@ -52,6 +52,7 @@ function startReady() {
 
 	startWait = true;
 	console.log("start");
+	sendDiscord("start");
 }
 
 app.get('/', function (req, res) {
