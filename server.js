@@ -1,8 +1,6 @@
 // .envをロード
 require('dotenv').config();
 
-var express = require('express');
-var app = express();
 var Discord = require('discord.io');
 var request = require('sync-request');
 
@@ -54,12 +52,6 @@ function startReady() {
 	console.log("start");
 	sendDiscord("start");
 }
-
-app.get('/', function (req, res) {
-  res.send('Hello, World!');
-});
-
-app.listen(process.env.PORT || 3000);
 
 // discordに接続したら
 bot.on('ready', function() {
