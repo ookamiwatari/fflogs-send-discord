@@ -29,9 +29,6 @@ if( process.env.DEFAULT_TARGET_GUILD_LIST ) targetGuildList = (process.env.DEFAU
 var targetReportList = [];
 if( process.env.DEFAULT_TARGET_REPORT_LIST ) targetReportList = (process.env.DEFAULT_TARGET_REPORT_LIST).split(",");
 
-// discordに接続したか
-var discordReady = false;
-
 // 起動後一定時間はdiscordにメッセージを送信しない待機
 var startWait = false;
 
@@ -42,6 +39,13 @@ var lastFightTime = 0;
 setTimeout(startReady, process.env.START_WAIT);
 setTimeout(getFight, process.env.START_WAIT/2);
 setTimeout(getReportList, process.env.START_WAIT/4);
+
+// 1分毎にDiscordへ再接続確認を行う
+setInterval(function(){
+	if (bot.bot != true) {
+		bot.connect();
+	}
+}, 6000);
 
 function startReady() {
 	// レポートリストを取得するループ
@@ -56,7 +60,6 @@ function startReady() {
 // discordに接続したら
 bot.on('ready', function() {
 	console.log('Logged in as %s - %s\n', bot.username, bot.id);
-	discordReady = true;
 });
 
 // discordからの操作用API
@@ -374,7 +377,7 @@ function getFight() {
 
 function sendDiscord( message, channel){
 
-	if(!discordReady || !startWait) return;
+	if(bot.bot == false || !startWait) return;
 
 	if(channel == undefined) channel = process.env.DISCORD_TARGET_CHANNEL
 
