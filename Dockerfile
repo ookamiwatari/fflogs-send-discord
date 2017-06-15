@@ -1,4 +1,4 @@
-FROM node:8-alpine
+FROM node:8-wheezy
  
 # Install app dependencies
 COPY package.json /src/package.json
