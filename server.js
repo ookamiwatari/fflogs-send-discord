@@ -11,10 +11,10 @@ var bot = new Discord.Client({
 
 
 // phantomjs用
-var path = require('path')
-var childProcess = require('child_process')
-var phantomjs = require('phantomjs-prebuilt')
-var binPath = phantomjs.path
+var path = require('path');
+var childProcess = require('child_process');
+var phantomjs = require('phantomjs-prebuilt');
+var binPath = phantomjs.path;
 
 
 // 環境変数からユーザリストをロード
