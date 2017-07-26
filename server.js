@@ -2,7 +2,7 @@
 require('dotenv').config();
 
 var Discord = require('discord.io');
-var request = require('sync-request');
+var request = require('then-request');
 
 var bot = new Discord.Client({
 	token: process.env.DISCORD_TOKEN,
@@ -97,24 +97,25 @@ bot.on('message', function(user, userID, channelID, message, event) {
 
 		// その名前が存在するか確認
 		var url = 'https://www.fflogs.com/v1/reports/user/' + messageArray[3] + '?api_key=' + process.env.FFLOGS_PUBLIC_KEY;
-		var response = request('GET', url);
-		if (response.statusCode == 400) {
-			var message = 'User \'' + messageArray[3] + '\' cannot be found.'
-			sendDiscord(message);
-			return;
-		}
+		request('GET', url).done(function (response) {
+			if (response.statusCode == 400) {
+				var message = 'User \'' + messageArray[3] + '\' cannot be found.'
+				sendDiscord(message);
+				return;
+			}
 
-		// 既に追加されている場合
-		if (targetUserList.indexOf(messageArray[3]) >=0 ) {
-			var message = 'User \'' + messageArray[3] + '\' already exists.'
-			sendDiscord(message);
-			return;
-		}
+			// 既に追加されている場合
+			if (targetUserList.indexOf(messageArray[3]) >=0 ) {
+				var message = 'User \'' + messageArray[3] + '\' already exists.'
+				sendDiscord(message);
+				return;
+			}
 
-		// リストに追加
-		var message = 'User \'' + messageArray[3] + '\' was added successfully.'
-		sendDiscord(message);
-		targetUserList.push(messageArray[3]);
+			// リストに追加
+			var message = 'User \'' + messageArray[3] + '\' was added successfully.'
+			sendDiscord(message);
+			targetUserList.push(messageArray[3]);
+		});
 	}
 
 	// user delete *の命令を追加
@@ -155,24 +156,25 @@ bot.on('message', function(user, userID, channelID, message, event) {
 
 		// その名前が存在するか確認
 		var url = 'https://www.fflogs.com/v1/reports/guild/' + messageArray[3] + '?api_key=' + process.env.FFLOGS_PUBLIC_KEY;
-		var response = request('GET', url);
-		if (response.statusCode == 400) {
-			var message = 'Guild \'' + messageArray[3] + '\' cannot be found.'
-			sendDiscord(message);
-			return;
-		}
+		request('GET', url).done(function (response) {
+			if (response.statusCode == 400) {
+				var message = 'Guild \'' + messageArray[3] + '\' cannot be found.'
+				sendDiscord(message);
+				return;
+			}
 
-		// 既に追加されている場合
-		if (targetGuildList.indexOf(messageArray[3]) >=0 ) {
-			var message = 'Guild \'' + messageArray[3] + '\' already exists.'
-			sendDiscord(message);
-			return;
-		}
+			// 既に追加されている場合
+			if (targetGuildList.indexOf(messageArray[3]) >=0 ) {
+				var message = 'Guild \'' + messageArray[3] + '\' already exists.'
+				sendDiscord(message);
+				return;
+			}
 
-		// リストに追加
-		var message = 'Guild \'' + messageArray[3] + '\' was added successfully.'
-		sendDiscord(message);
-		targetGuildList.push(messageArray[3]);
+			// リストに追加
+			var message = 'Guild \'' + messageArray[3] + '\' was added successfully.'
+			sendDiscord(message);
+			targetGuildList.push(messageArray[3]);
+		});
 	}
 
 	// guild delete *の命令を追加
@@ -213,24 +215,25 @@ bot.on('message', function(user, userID, channelID, message, event) {
 
 		// その名前が存在するか確認
 		var url = 'https://www.fflogs.com/v1/report/fights/' + messageArray[3] + '?api_key=' + process.env.FFLOGS_PUBLIC_KEY;
-		var response = request('GET', url);
-		if (response.statusCode == 400) {
-			var message = 'Report \'' + messageArray[3] + '\' cannot be found.'
-			sendDiscord(message);
-			return;
-		}
+		request('GET', url).done(function (response) {
+			if (response.statusCode == 400) {
+				var message = 'Report \'' + messageArray[3] + '\' cannot be found.'
+				sendDiscord(message);
+				return;
+			}
 
-		// 既に追加されている場合
-		if (targetReportList.indexOf(messageArray[3]) >=0 ) {
-			var message = 'Report \'' + messageArray[3] + '\' already exists.'
-			sendDiscord(message);
-			return;
-		}
+			// 既に追加されている場合
+			if (targetReportList.indexOf(messageArray[3]) >=0 ) {
+				var message = 'Report \'' + messageArray[3] + '\' already exists.'
+				sendDiscord(message);
+				return;
+			}
 
-		// リストに追加
-		var message = 'Report \'' + messageArray[3] + '\' was added successfully.'
-		sendDiscord(message);
-		targetReportList.push(messageArray[3]);
+			// リストに追加
+			var message = 'Report \'' + messageArray[3] + '\' was added successfully.'
+			sendDiscord(message);
+			targetReportList.push(messageArray[3]);
+		});
 	}
 
 	// report delete *の命令を追加
@@ -269,54 +272,54 @@ function getReportList() {
 
 		// レポートを取得
 		var url = 'https://www.fflogs.com/v1/reports/user/' + userName + '?api_key=' + process.env.FFLOGS_PUBLIC_KEY;
-		var response = request('GET', url);
-		if (response.statusCode !== 200 ) return;
+		request('GET', url).done(function (response) {
+			if (response.statusCode !== 200 ) return;
 
-		var body = JSON.parse(response.body.toString());
+			var body = JSON.parse(response.body.toString());
 
-		// 最新のレポートを取得
-		var lastReport = body[0];
-		body.forEach(function(report) {
-			if(lastReport.end < report.end) {
-				lastReport = report;
+			// 最新のレポートを取得
+			var lastReport = body[0];
+			body.forEach(function(report) {
+				if(lastReport.end < report.end) {
+					lastReport = report;
+				}
+			});
+
+			// リストに存在するか確認して追加する
+			var index = targetReportList.indexOf(lastReport.id);
+			if (index == -1) {
+				targetReportList.push(lastReport.id);
+				var message = 'Automatically added new report:\nhttps://ja.fflogs.com/reports/' + lastReport.id;
+				sendDiscord(message);
 			}
 		});
-
-		// リストに存在するか確認して追加する
-		var index = targetReportList.indexOf(lastReport.id);
-		if (index == -1) {
-			targetReportList.push(lastReport.id);
-			var message = 'Automatically added new report:\nhttps://ja.fflogs.com/reports/' + lastReport.id;
-			sendDiscord(message);
-		}
-
 	});
 
 	targetGuildList.forEach(function(guildName) {
 
 		// レポートを取得
 		var url = 'https://www.fflogs.com/v1/reports/guild/' + guildName + '?api_key=' + process.env.FFLOGS_PUBLIC_KEY;
-		var response = request('GET', url);
-		if (response.statusCode !== 200 ) return;
+		request('GET', url).done(function (response) {
+			if (response.statusCode !== 200 ) return;
 
-		var body = JSON.parse(response.body.toString());
+			var body = JSON.parse(response.body.toString());
 
-		// 最新のレポートを取得
-		var lastReport = body[0];
-		body.forEach(function(report) {
-			if(lastReport.end < report.end) {
-				lastReport = report;
+			// 最新のレポートを取得
+			var lastReport = body[0];
+			body.forEach(function(report) {
+				if(lastReport.end < report.end) {
+					lastReport = report;
+				}
+			});
+
+			// リストに存在するか確認して追加する
+			var index = targetReportList.indexOf(lastReport.id);
+			if (index == -1) {
+				targetReportList.push(lastReport.id);
+				var message = 'Automatically added new report:\nhttps://ja.fflogs.com/reports/' + lastReport.id;
+				sendDiscord(message);
 			}
 		});
-
-		// リストに存在するか確認して追加する
-		var index = targetReportList.indexOf(lastReport.id);
-		if (index == -1) {
-			targetReportList.push(lastReport.id);
-			var message = 'Automatically added new report:\nhttps://ja.fflogs.com/reports/' + lastReport.id;
-			sendDiscord(message);
-		}
-
 	});
 }
 
@@ -327,17 +330,20 @@ function getFight() {
 	targetReportList.forEach(function(report) {
 
 		var url = 'https://www.fflogs.com/v1/report/fights/' + report + '?api_key=' + process.env.FFLOGS_PUBLIC_KEY;
-		var response = request('GET', url);
-		if (response.statusCode !== 200 ) return;
+		request('GET', url).done(function (response) {
+			if (response.statusCode !== 200 ) return;
 
-		var body = JSON.parse(response.body.toString());
+			var body = JSON.parse(response.body.toString());
 
-		if( body.fights === undefined ) return;
-		if( body.fights[body.fights.length-1] === undefined ) return;
-		if( body.fights[body.fights.length-1].kill === undefined ) return;
+			if( body.fights === undefined ) return;
+			if( body.fights[body.fights.length-1] === undefined ) return;
+			if( body.fights[body.fights.length-1].kill === undefined ) return;
 
-		// 新しいのが有る場合
-		if(lastFightTime < body.start + body.fights[body.fights.length-1].end_time - process.env.API_INTERVAL ) {
+			// 新しいのが無い場合
+			if(lastFightTime >= body.start + body.fights[body.fights.length-1].end_time) return;
+
+			// 戦闘の取得を実行
+			console.log("new fight found!");
 			lastFight = body.fights[body.fights.length-1];
 			lastFightTime = body.start + lastFight.end_time;
 
@@ -349,43 +355,42 @@ function getFight() {
 				lastFight.id
 			];
 
-		}
+			console.log("last fight is " + report + "#" + lastFight.id);
+
+			var message = "";
+
+			// 敵の名前を追加
+			message += "【" + lastFight.name + "】";
+			message += lastFight.zoneName;
+			message += " ";
+
+			// 所要時間を追加
+			var time = lastFight.end_time - lastFight.start_time;
+			var timeMsg = "" + Math.floor(time / 1000 / 60) + ":" + ('00'+(Math.floor(time/1000) % 60)).slice(-2);
+			if ( lastFight.kill == true ) {
+				message += "kill ";
+				message += timeMsg + "\n";
+			} else if ( lastFight.kill == false ) {
+				message += lastFight.bossPercentage / 100;
+				message += "% wipe "
+				message += timeMsg + "\n"
+			} else {
+				message += timeMsg + "\n";
+			}
+
+			childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
+				message += '```\n'
+				message += stdout.match(/.*Start_Response\s+([\s\S]*)\s+End_Response.*/)[1].slice(0,-2);
+				message +='\n```'
+				console.log(message);
+				sendDiscord(message, process.env.DISCORD_REPORT_CHANNEL);
+			});
+
+		});
 	});
-
-	// 新しいのが無い場合
-	if(!lastFight) return;
-
-	var message = "";
-
-	// 敵の名前を追加
-	message += "【" + lastFight.name + "】";
-	message += lastFight.zoneName;
-	message += " ";
-
-	// 所要時間を追加
-	var time = lastFight.end_time - lastFight.start_time;
-	var timeMsg = "" + Math.floor(time / 1000 / 60) + ":" + ('00'+(Math.floor(time/1000) % 60)).slice(-2);
-	if ( lastFight.kill == true ) {
-		message += "kill ";
-		message += timeMsg + "\n";
-	} else if ( lastFight.kill == false ) {
-		message += lastFight.bossPercentage / 100;
-		message += timeMsg + "\n"
-	} else {
-		message += timeMsg + "\n";
-	}
-
-	childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
-		message += '```\n'
-		message += stdout.match(/.*Start_Response\s+([\s\S]*)\s+End_Response.*/)[1].slice(0,-2);
-		message +='\n```'
-		console.log(message);
-		sendDiscord(message);
-	});
-
 }
 
-function sendDiscord( message, channel){
+function sendDiscord(message, channel){
 
 	if(bot.bot == false || !startWait) return;
 
