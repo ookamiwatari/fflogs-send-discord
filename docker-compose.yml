@@ -3,3 +3,4 @@ services:
   fflogs-send-discord:
     build: .
     container_name: fflogs-send-discord
+    restart: always
