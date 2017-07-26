@@ -76,7 +76,7 @@ bot.on('ready', function() {
 bot.on('message', function(user, userID, channelID, message, event) {
 
 	// 対象のチャンネルじゃなければ終了する
-	if (channelID !== process.env.DISCORD_TARGET_CHANNEL) {
+	if (channelID !== process.env.DISCORD_RANDOM_CHANNEL) {
 		return;
 	}
 
@@ -389,7 +389,7 @@ function sendDiscord( message, channel){
 
 	if(bot.bot == false || !startWait) return;
 
-	if(channel == undefined) channel = process.env.DISCORD_TARGET_CHANNEL
+	if(channel == undefined) channel = process.env.DISCORD_RANDOM_CHANNEL
 
 	bot.sendMessage({
 		to: channel,
