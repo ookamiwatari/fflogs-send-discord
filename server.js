@@ -45,8 +45,16 @@ setInterval(function(){
 		console.log('bot status is '+bot.presenceStatus+' .');
 		bot.disconnect();
 		bot.connect();
+		setTimeout(function(){sendDiscord("ReConnect");}, 10000);
 	}
-}, 6000);
+}, 30000);
+
+
+setInterval(function(){
+	console.log(new Date());
+	console.log(lastFightTime);
+}, 30000);
+
 
 function startReady() {
 	// レポートリストを取得するループ
