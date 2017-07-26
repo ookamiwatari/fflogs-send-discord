@@ -6,7 +6,6 @@ var request = require('sync-request');
 
 var bot = new Discord.Client({
 	token: process.env.DISCORD_TOKEN,
-	autorun: true
 });
 
 
@@ -42,7 +41,9 @@ setTimeout(getReportList, process.env.START_WAIT/4);
 
 // 1分毎にDiscordへ再接続確認を行う
 setInterval(function(){
-	if (bot.bot != true) {
+	if (bot.presenceStatus != 'online') {
+		console.log('bot status is '+bot.presenceStatus+' .');
+		bot.disconnect();
 		bot.connect();
 	}
 }, 6000);
@@ -60,6 +61,7 @@ function startReady() {
 // discordに接続したら
 bot.on('ready', function() {
 	console.log('Logged in as %s - %s\n', bot.username, bot.id);
+	sendDiscord('Logged in as %s - %s\n', bot.username, bot.id);
 });
 
 // discordからの操作用API
