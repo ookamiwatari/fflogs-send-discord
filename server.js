@@ -24,16 +24,18 @@ var childProcess = require('child_process');
 var phantomjs = require('phantomjs-prebuilt');
 var binPath = phantomjs.path;
 
+// ターゲットリストを宣言
+var targetList = {
+	users: [],
+	guilds: [],
+	reports: {}
+};
 
 // 環境変数からユーザリストをロード
-var targetUserList = [];
-if( process.env.DEFAULT_TARGET_USER_LIST ) targetUserList = (process.env.DEFAULT_TARGET_USER_LIST).split(",");
+if( process.env.DEFAULT_TARGET_USER_LIST ) targetList.users = (process.env.DEFAULT_TARGET_USER_LIST).split(",");
 
 // 環境変数からギルドリストをロード
-var targetGuildList = [];
-if( process.env.DEFAULT_TARGET_GUILD_LIST ) targetGuildList = (process.env.DEFAULT_TARGET_GUILD_LIST).split(",");
-
-var targetReportList = {};
+if( process.env.DEFAULT_TARGET_GUILD_LIST ) targetList.guilds = (process.env.DEFAULT_TARGET_GUILD_LIST).split(",");
 
 var waitGetFightList = [];
 
@@ -68,7 +70,7 @@ function startReady() {
 	// レポートリストを取得するループ
 	setInterval(getReportList, process.env.API_INTERVAL);
 	setInterval(getFightList,process.env.API_INTERVAL);
-	
+
 	setTimeout(function(){
 		waitGetFightList = [];
 		startWait = true;
@@ -100,7 +102,7 @@ bot.on('message', function(user, userID, channelID, message, event) {
 	// user listの命令を追加
 	// ToDo: わかりやすく描画させる
 	if (messageArray[1] === 'user' && messageArray[2] === 'list' && messageArray.length == 3 ) {
-		sendDiscord(targetUserList.join('\n'));
+		sendDiscord(targetList.users.join('\n'));
 	}
 
 	// user add *の命令を追加
@@ -116,7 +118,7 @@ bot.on('message', function(user, userID, channelID, message, event) {
 			}
 
 			// 既に追加されている場合
-			if (targetUserList.indexOf(messageArray[3]) >=0 ) {
+			if (targetList.users.indexOf(messageArray[3]) >=0 ) {
 				var message = 'User \'' + messageArray[3] + '\' already exists.'
 				sendDiscord(message);
 				return;
@@ -125,7 +127,7 @@ bot.on('message', function(user, userID, channelID, message, event) {
 			// リストに追加
 			var message = 'User \'' + messageArray[3] + '\' was added successfully.'
 			sendDiscord(message);
-			targetUserList.push(messageArray[3]);
+			targetList.users.push(messageArray[3]);
 		});
 	}
 
@@ -133,9 +135,9 @@ bot.on('message', function(user, userID, channelID, message, event) {
 	if (messageArray[1] === 'user' && messageArray[2] === 'delete' && messageArray.length == 4 ) {
 
 		// その名前が存在するか確認
-		var index = targetUserList.indexOf(messageArray[3]);
+		var index = targetList.users.indexOf(messageArray[3]);
 		if (index >=0 ) {
-			targetUserList.splice(index,1);
+			targetList.users.splice(index,1);
 			var message = 'User \'' + messageArray[3] + '\' was deleted successfully.'
 			sendDiscord(message);
 			return;
@@ -150,7 +152,7 @@ bot.on('message', function(user, userID, channelID, message, event) {
 
 	// user delete の命令を追加
 	if (messageArray[1] === 'user' && messageArray[2] === 'delete' && messageArray.length == 3 ) {
-		targetUserList = [];
+		targetList.users = [];
 		var message = 'UserList delete successfully.'
 		sendDiscord(message);
 		return;
@@ -159,7 +161,7 @@ bot.on('message', function(user, userID, channelID, message, event) {
 	// guild listの命令を追加
 	// ToDo: わかりやすく描画させる
 	if (messageArray[1] === 'guild' && messageArray[2] === 'list' && messageArray.length == 3 ) {
-		sendDiscord(targetGuildList.join('\n'));
+		sendDiscord(targetList.guilds.join('\n'));
 	}
 
 	// guild add *の命令を追加
@@ -175,7 +177,7 @@ bot.on('message', function(user, userID, channelID, message, event) {
 			}
 
 			// 既に追加されている場合
-			if (targetGuildList.indexOf(messageArray[3]) >=0 ) {
+			if (targetList.guilds.indexOf(messageArray[3]) >=0 ) {
 				var message = 'Guild \'' + messageArray[3] + '\' already exists.'
 				sendDiscord(message);
 				return;
@@ -184,7 +186,7 @@ bot.on('message', function(user, userID, channelID, message, event) {
 			// リストに追加
 			var message = 'Guild \'' + messageArray[3] + '\' was added successfully.'
 			sendDiscord(message);
-			targetGuildList.push(messageArray[3]);
+			targetList.guilds.push(messageArray[3]);
 		});
 	}
 
@@ -192,9 +194,9 @@ bot.on('message', function(user, userID, channelID, message, event) {
 	if (messageArray[1] === 'guild' && messageArray[2] === 'delete' && messageArray.length == 4 ) {
 
 		// その名前が存在するか確認
-		var index = targetGuildList.indexOf(messageArray[3]);
+		var index = targetList.guilds.indexOf(messageArray[3]);
 		if (index >=0 ) {
-			targetGuildList.splice(index,1);
+			targetList.guilds.splice(index,1);
 			var message = 'Guild \'' + messageArray[3] + '\' was deleted successfully.'
 			sendDiscord(message);
 			return;
@@ -209,7 +211,7 @@ bot.on('message', function(user, userID, channelID, message, event) {
 
 	// guild delete の命令を追加
 	if (messageArray[1] === 'guild' && messageArray[2] === 'delete' && messageArray.length == 3 ) {
-		targetGuildList = [];
+		targetList.guilds = [];
 		var message = 'GuildList delete successfully.'
 		sendDiscord(message);
 		return;
@@ -219,10 +221,10 @@ bot.on('message', function(user, userID, channelID, message, event) {
 	// ToDo: わかりやすく描画させる
 	if (messageArray[1] === 'report' && messageArray[2] === 'list' && messageArray.length == 3 ) {
 		var message = "";
-		for(var report in targetReportList) {
-			message += report + ": " + targetReportList[report] + "\n";
+		for(var report in targetList.reports) {
+			message += report + ": " + targetList.reports[report] + "\n";
 		}
-		
+
 		sendDiscord(message);
 	}
 
@@ -239,7 +241,7 @@ bot.on('message', function(user, userID, channelID, message, event) {
 			}
 
 			// 既に追加されている場合
-			if ( targetReportList[messageArray[3]] ) {
+			if ( targetList.reports[messageArray[3]] ) {
 				var message = 'Report \'' + messageArray[3] + '\' already exists.'
 				sendDiscord(message);
 				return;
@@ -248,7 +250,7 @@ bot.on('message', function(user, userID, channelID, message, event) {
 			// リストに追加
 			var message = 'Report \'' + messageArray[3] + '\' was added successfully.'
 			sendDiscord(message);
-			targetReportList[messageArray[3]] = 0;
+			targetList.reports[messageArray[3]] = 0;
 		});
 	}
 
@@ -256,8 +258,8 @@ bot.on('message', function(user, userID, channelID, message, event) {
 	if (messageArray[1] === 'report' && messageArray[2] === 'delete' && messageArray.length == 4 ) {
 
 		// その名前が存在するか確認
-		if ( targetReportList[messageArray[3]] ) {
-			delete targetReportList[messageArray[3]];
+		if ( targetList.reports[messageArray[3]] ) {
+			delete targetList.reports[messageArray[3]];
 			var message = 'Report \'' + messageArray[3] + '\' was deleted successfully.'
 			sendDiscord(message);
 			return;
@@ -272,7 +274,7 @@ bot.on('message', function(user, userID, channelID, message, event) {
 
 	// report delete の命令を追加
 	if (messageArray[1] === 'report' && messageArray[2] === 'delete' && messageArray.length == 3 ) {
-		targetReportList = [];
+		targetList.reports = [];
 		var message = 'ReportList delete successfully.'
 		sendDiscord(message);
 		return;
@@ -283,7 +285,7 @@ bot.on('message', function(user, userID, channelID, message, event) {
 
 function getReportList() {
 
-	targetUserList.forEach(function(userName) {
+	targetList.users.forEach(function(userName) {
 
 		// レポートを取得
 		var url = 'https://www.fflogs.com/v1/reports/user/' + userName + '?api_key=' + process.env.FFLOGS_PUBLIC_KEY;
@@ -301,15 +303,15 @@ function getReportList() {
 			});
 
 			// リストに存在するか確認して追加する
-			if (targetReportList[lastReport.id] == undefined) {
-				targetReportList[lastReport.id] = 0;
+			if (targetList.reports[lastReport.id] == undefined) {
+				targetList.reports[lastReport.id] = 0;
 				var message = 'Automatically added new report:\nhttps://ja.fflogs.com/reports/' + lastReport.id;
 				sendDiscord(message, process.env.DISCORD_REPORT_CHANNEL);
 			}
 		});
 	});
 
-	targetGuildList.forEach(function(guildName) {
+	targetList.guilds.forEach(function(guildName) {
 
 		// レポートを取得
 		var url = 'https://www.fflogs.com/v1/reports/guild/' + guildName + '?api_key=' + process.env.FFLOGS_PUBLIC_KEY;
@@ -327,8 +329,8 @@ function getReportList() {
 			});
 
 			// リストに存在するか確認して追加する
-			if (targetReportList[lastReport.id] == undefined) {
-				targetReportList[lastReport.id] = 0;
+			if (targetList.reports[lastReport.id] == undefined) {
+				targetList.reports[lastReport.id] = 0;
 				var message = 'Automatically added new report:\nhttps://ja.fflogs.com/reports/' + lastReport.id;
 				sendDiscord(message, process.env.DISCORD_REPORT_CHANNEL);
 			}
@@ -338,8 +340,8 @@ function getReportList() {
 
 function getFightList() {
 
-	
-	for(var report in targetReportList) {
+
+	for(var report in targetList.reports) {
 		(function(n) {
 
 			var url = 'https://www.fflogs.com/v1/report/fights/' + report + '?api_key=' + process.env.FFLOGS_PUBLIC_KEY;
@@ -353,7 +355,7 @@ function getFightList() {
 				if( body.fights === undefined ) return;
 
 
-				for (var i = targetReportList[n]; i < body.fights.length; i++ ) {
+				for (var i = targetList.reports[n]; i < body.fights.length; i++ ) {
 
 
 					var fight = body.fights[i];
@@ -364,7 +366,7 @@ function getFightList() {
 					fight.fightId = n;
 					waitGetFightList.push(fight);
 				}
-				targetReportList[n] = body.fights.length;
+				targetList.reports[n] = body.fights.length;
 			});
 		})(report);
 	}
@@ -406,7 +408,7 @@ function getFight(fight) {
 	} else {
 		message += timeMsg + "\n";
 	}
-	
+
 
 	childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
 		message += '```\n'
