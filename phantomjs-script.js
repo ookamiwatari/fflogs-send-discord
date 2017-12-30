@@ -22,7 +22,7 @@ page.open(args[1] + args[2] + '#fight=' + args[3] + '&type=damage-done', functio
 var eva = function() {
 
 	var msg = "";
-	// ŠeX‚Ì’l‚ğæ“¾
+	// å„ã€…ã®å€¤ã‚’å–å¾—
 	for (var i = 0, size = $(".table-icon").length; i < size; i++) {
 		if($(".main-table-performance")[i]) {
 			msg += $(".main-table-performance")[i].innerText.replace(/\t|(\r?\n)/g,"");
@@ -44,8 +44,8 @@ var eva = function() {
 		
 		msg += "\n";
 	}
-	
-	// total‚Ì’l‚ğæ“¾
+
+	// totalã®å€¤ã‚’å–å¾—
 	{
 		if($(".main-table-performance")[$(".main-table-performance").length-1]) {
 			msg += $(".main-table-performance")[$(".main-table-performance").length-1].innerText.replace(/\t|(\r?\n)/g,"");
