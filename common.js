@@ -1,3 +1,5 @@
+var request = require('then-request');
+
 module.exports = {
 
 	getApiResponse: function (request, targetList) {

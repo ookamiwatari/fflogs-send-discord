@@ -4,7 +4,7 @@ var args = system.args;
 var page = require('webpage').create();
 
 page.open(args[1] + args[2] + '#fight=' + args[3] + '&type=damage-done', function(status) {
-	
+
 		page.includeJs('http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js', function() {
 			setTimeout(function () {
 				console.log("Start_Response")
@@ -21,45 +21,50 @@ page.open(args[1] + args[2] + '#fight=' + args[3] + '&type=damage-done', functio
 
 var eva = function() {
 
-	var msg = "";
+	var result = {
+		player: {},
+		total: {}
+	};
 	// 各々の値を取得
 	for (var i = 0, size = $(".table-icon").length; i < size; i++) {
+
+		var name = $(".main-table-name")[i].innerText.replace(/\t|(\r?\n)/g,"");
+
+		result.player[name] = {
+			name: name
+		}
+
 		if($(".main-table-performance")[i]) {
-			msg += $(".main-table-performance")[i].innerText.replace(/\t|(\r?\n)/g,"");
-			msg += "% ";
+			result.player[name]['perf'] = $(".main-table-performance")[i].innerText.replace(/\t|(\r?\n)/g,"");
 		}
-		
-		if($(".main-table-name")[i]) {
-			msg += $(".main-table-name")[i].innerText.replace(/\t|(\r?\n)/g,"");
-		}
+
 		if($(".table-icon")[i]) {
-			msg += " (";
-			msg += $(".table-icon")[i].src.match(/\/(\w+).png/)[1];
-			msg += ") ";
+			result.player[name]['job'] = $(".table-icon")[i].src.match(/\/(\w+).png/)[1];
 		}
 
 		if($(".main-table-number")[i]) {
-			msg += $(".main-table-number")[i].innerText.replace(/\t|(\r?\n)/g,"");
+			result.player[name]['dps'] = $(".main-table-number")[i].innerText.replace(/\t|(\r?\n)/g,"");
 		}
-		
-		msg += "\n";
+
 	}
 
 	// totalの値を取得
 	{
+
+		result.total = {
+			perf: null,
+			dps: null
+		};
+
 		if($(".main-table-performance")[$(".main-table-performance").length-1]) {
-			msg += $(".main-table-performance")[$(".main-table-performance").length-1].innerText.replace(/\t|(\r?\n)/g,"");
-			msg += "% "
+			result.total.perf = $(".main-table-performance")[$(".main-table-performance").length-1].innerText.replace(/\t|(\r?\n)/g,"");
 		}
-
-		msg += "Total ";
-
 		if($(".main-table-number")[$(".main-table-number").length-1]) {
-			msg += $(".main-table-number")[$(".main-table-number").length-1].innerText;
+			// dps
+			result.total.dps = $(".main-table-number")[$(".main-table-number").length-1].innerText;
 		}
 
-		msg += "\n";
 	}
 
-	return msg;
+	return JSON.stringify(result);
 }

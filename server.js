@@ -207,35 +207,88 @@ function getFight(fight) {
 
 	console.log("this fight is " + fight.fightId + "#" + fight.id);
 
-	var message = "https://ja.fflogs.com/reports/" + fight.fightId + "#fight=" + fight.id + "&type=summary\n";
+	var headerMessage = "https://ja.fflogs.com/reports/" + fight.fightId + "#fight=" + fight.id + "&type=summary\n";
 
 	// 敵の名前を追加
-	message += "【" + fight.name + "】";
-	message += fight.zoneName;
-	message += " ";
+	headerMessage += "【" + fight.name + "】";
+	headerMessage += fight.zoneName;
+	headerMessage += " ";
 
 	// 所要時間を追加
 	var time = fight.end_time - fight.start_time;
 	var timeMsg = "" + Math.floor(time / 1000 / 60) + ":" + ('00'+(Math.floor(time/1000) % 60)).slice(-2);
 	if ( fight.kill == true ) {
-		message += "kill ";
-		message += timeMsg + "\n";
+		headerMessage += "kill ";
+		headerMessage += timeMsg + "\n";
 	} else if ( fight.kill == false ) {
-		message += fight.bossPercentage / 100;
-		message += "% wipe "
-		message += timeMsg + "\n"
+		headerMessage += fight.bossPercentage / 100;
+		headerMessage += "% wipe "
+		headerMessage += timeMsg + "\n"
 	} else {
-		message += timeMsg + "\n";
+		headerMessage += timeMsg + "\n";
 	}
 
-
 	childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
-		message += '```\n'
-		message += stdout.match(/.*Start_Response\s+([\s\S]*)\s+End_Response.*/)[1].slice(0,-2);
-		message +='\n```'
-		console.log(message);
-		sendDiscord(message, process.env.DISCORD_REPORT_CHANNEL);
+
+		var fflogsResponce = JSON.parse(stdout.match(/.*Start_Response\s+([\s\S]*)\s+End_Response.*/)[1]);
+
+		var url = 'https://ookamiwatari-xivrdps.herokuapp.com/api/encounters/' + fight.fightId + '/' + fight.id;
+		console.log(url);
+		request('GET', url).done(function (response) {
+			var xivrdpsResponce = JSON.parse(response.body.toString());
+
+			console.log(fflogsResponce);
+			console.log(xivrdpsResponce);
+
+			var message = headerMessage + createResultMessage(fflogsResponce, xivrdpsResponce);
+
+			console.log(message);
+
+			sendDiscord(message, process.env.DISCORD_REPORT_CHANNEL);
+
+		});
+
 	});
+}
+
+function createResultMessage(fflogsResponce, xivrdpsResponce) {
+	var msg = '';
+	var msg = '```\n';
+	for(var player of xivrdpsResponce.damageDone) {
+
+		if(fflogsResponce.player[player.name].perf) {
+			msg += fflogsResponce.player[player.name].perf;
+			msg += '% ';
+		}
+
+		msg += player.name;
+
+		msg += ' (';
+		msg += player.type;
+		msg += ') ';
+
+		msg += player.personalDPS;
+
+		msg += '(';
+		msg += player.raidDPS;
+		msg += ') ';
+
+		msg += '\n';
+	}
+
+	if(fflogsResponce.total.perf) {
+		msg += fflogsResponce.total.perf;
+		msg += '% ';
+	}
+
+	if(fflogsResponce.total.dps) {
+		msg += fflogsResponce.total.dps;
+	}
+
+	msg += '\n```'
+
+	return msg;
+
 }
 
 function sendDiscord(message, channel){
