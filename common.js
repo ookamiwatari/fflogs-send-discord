@@ -1,4 +1,4 @@
-var request = require('then-request');
+var thenRequest = require('then-request');
 
 module.exports = {
 
@@ -27,7 +27,7 @@ module.exports = {
 
 			// その名前が存在するか確認
 			var url = 'https://www.fflogs.com/v1/reports/user/' + messageArray[3] + '?api_key=' + process.env.FFLOGS_PUBLIC_KEY;
-			request('GET', url).done(function (response) {
+			thenRequest('GET', url).done(function (response) {
 				if (response.statusCode == 400) {
 					var message = 'User \'' + messageArray[3] + '\' cannot be found.'
 					return message;
@@ -82,7 +82,7 @@ module.exports = {
 
 			// その名前が存在するか確認
 			var url = 'https://www.fflogs.com/v1/reports/guild/' + messageArray[3] + '?api_key=' + process.env.FFLOGS_PUBLIC_KEY;
-			request('GET', url).done(function (res) {
+			thenRequest('GET', url).done(function (res) {
 				if (res.statusCode == 400) {
 					var message = 'Guild \'' + messageArray[3] + '\' cannot be found.'
 					return message;
@@ -140,7 +140,7 @@ module.exports = {
 
 			// その名前が存在するか確認
 			var url = 'https://www.fflogs.com/v1/report/fights/' + messageArray[3] + '?api_key=' + process.env.FFLOGS_PUBLIC_KEY;
-			request('GET', url).done(function (res) {
+			thenRequest('GET', url).done(function (res) {
 				if (res.statusCode == 400) {
 					var message = 'Report \'' + messageArray[3] + '\' cannot be found.'
 					return message;
