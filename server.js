@@ -239,9 +239,6 @@ function getFight(fight) {
 			request('GET', url).done(function (response) {
 				var xivrdpsResponce = JSON.parse(response.body.toString());
 
-				console.log(fflogsResponce);
-				console.log(xivrdpsResponce);
-
 				var message = headerMessage + createResultMessage(fflogsResponce, xivrdpsResponce);
 
 				console.log(message);
