@@ -62,10 +62,10 @@ setInterval(function(){
 }, 30000);
 
 
-// 40秒毎にlogsから戦闘を取得する
+// 60秒毎にlogsから戦闘を取得する
 setInterval(function(){
 	getFight(waitGetFightList.shift());
-}, 40000);
+}, 60000);
 
 
 function startReady() {
