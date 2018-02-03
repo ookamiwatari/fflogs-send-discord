@@ -275,9 +275,11 @@ function createResultMessage(fflogsResponce, xivrdpsResponce) {
 
 		msg += player.personalDPS;
 
+/*
 		msg += '(';
 		msg += player.raidDPS;
 		msg += ') ';
+*/
 
 		msg += '\n';
 	}
