@@ -11,7 +11,7 @@ page.open(args[1] + args[2] + '#fight=' + args[3] + '&type=damage-done', functio
 				console.log(page.evaluate(eva));
 				console.log("End_Response");
 				phantom.exit();
-			}, 10000);
+			}, 20000);
 		});
 
 
