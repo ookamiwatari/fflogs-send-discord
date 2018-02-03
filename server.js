@@ -230,23 +230,32 @@ function getFight(fight) {
 
 	childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
 
-		var fflogsResponce = JSON.parse(stdout.match(/.*Start_Response\s+([\s\S]*)\s+End_Response.*/)[1]);
+		try {
 
-		var url = 'https://ookamiwatari-xivrdps.herokuapp.com/api/encounters/' + fight.fightId + '/' + fight.id;
-		console.log(url);
-		request('GET', url).done(function (response) {
-			var xivrdpsResponce = JSON.parse(response.body.toString());
+			var fflogsResponce = JSON.parse(stdout.match(/.*Start_Response\s+([\s\S]*)\s+End_Response.*/)[1]);
 
-			console.log(fflogsResponce);
-			console.log(xivrdpsResponce);
+			var url = 'https://ookamiwatari-xivrdps.herokuapp.com/api/encounters/' + fight.fightId + '/' + fight.id;
+			console.log(url);
+			request('GET', url).done(function (response) {
+				var xivrdpsResponce = JSON.parse(response.body.toString());
 
-			var message = headerMessage + createResultMessage(fflogsResponce, xivrdpsResponce);
+				console.log(fflogsResponce);
+				console.log(xivrdpsResponce);
 
-			console.log(message);
+				var message = headerMessage + createResultMessage(fflogsResponce, xivrdpsResponce);
 
-			sendDiscord(message, process.env.DISCORD_REPORT_CHANNEL);
+				console.log(message);
 
-		});
+				sendDiscord(message, process.env.DISCORD_REPORT_CHANNEL);
+
+			});
+
+		} catch (e) {
+
+			console.log('stdout', stdout);
+			console.log('error', e);
+
+		}
 
 	});
 }
