@@ -3,6 +3,7 @@ require('dotenv').config();
 
 var Discord = require('discord.io');
 var request = require('then-request');
+var ps = require('ps-node');
 
 var common = require('./common');
 
@@ -62,10 +63,32 @@ setInterval(function(){
 }, 30000);
 
 
-// 60秒毎にlogsから戦闘を取得する
+// 5秒毎にlogsから戦闘を取得するか判定する
 setInterval(function(){
-	getFight(waitGetFightList.shift());
-}, 60000);
+	getFightInterval();
+}, 5000);
+
+// phantomjsのプロセスが動いていなければ戦闘の取得処理を実行する
+function getFightInterval() {
+
+	ps.lookup(
+		{ command: 'phantomjs' },
+		function(err, resultList ) {
+			if (err) {
+				throw new Error( err );
+				return;
+			}
+
+			if ( resultList.length !== 0 ) {
+				console.log('phantomjs is processing!');
+				return;
+			}
+
+			getFight(waitGetFightList.shift());
+
+		}
+	);
+}
 
 
 function startReady() {
