@@ -1,6 +1,13 @@
 version: '3'
 services:
   fflogs-send-discord:
-    build: .
     container_name: fflogs-send-discord
+    env_file: .env
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
     restart: always
+    volumes:
+      - ./lib:/var/app/lib

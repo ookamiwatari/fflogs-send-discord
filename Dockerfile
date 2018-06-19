@@ -1,13 +1,13 @@
 FROM node:8-wheezy
- 
-# Install app dependencies
-COPY package.json /src/package.json
-WORKDIR /src
+
+WORKDIR /var/app/
+
+EXPOSE 8080
+
+ADD package.json /var/app/
 
 RUN npm install
 
-# Copy the application files
-COPY . /src
+ADD . /var/app/
 
-# Start the server
-CMD ["npm", "start"]
+CMD ["npm", "run", "dev"]
