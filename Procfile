@@ -1,1 +1,1 @@
-worker: DEBUG=* xvfb-run --auto-servernum --server-args="-screen 0 1024x768x24" node --harmony index.js
+web: xvfb-run --server-args="-screen 9 1280x2000x24" npm run dev
