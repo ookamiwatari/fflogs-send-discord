@@ -1,1 +1,1 @@
-web: xvfb-run --server-args="-screen 9 1280x2000x24" npm start
+web: xvfb-run --server-args="-screen 0 520x416x8" npm start

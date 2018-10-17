@@ -14,4 +14,4 @@ RUN npm install
 
 ADD . /var/app/
 
-CMD xvfb-run --server-args="-screen 9 1280x2000x24" npm run dev
+CMD xvfb-run --server-args="-screen 0 520x416x8" npm run dev
